@@ -1,0 +1,75 @@
+﻿@model IEnumerable<Data.Entities.PastReservation>
+@using Data.Entities
+@using Microsoft.AspNetCore.Http
+@using ToDoManager.Models.Home
+@using ToDoManager.Utils
+
+@{
+    ViewData["Title"] = "Index";
+}
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    LoggedUser loggedUser = HttpContextAccessor.HttpContext.Session.GetObjectFromJson<LoggedUser>("loggedUser") == null
+        ? null
+        : HttpContextAccessor.HttpContext.Session.GetObjectFromJson<LoggedUser>("loggedUser");
+}
+
+
+@if (loggedUser != null)
+{
+    <h1>Past Reservations</h1>
+
+}
+
+
+<table class="table">
+    <thead>
+        <tr>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Reservation.ReservationHolder)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Reservation.ServiceWaiter)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Reservation.Date)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Reservation.Time)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Reservation.TotalPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Reservation.Tip)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Where(r => r.Reservation.ReservationHolderId == loggedUser.Id))
+        {
+            <tr>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Reservation.ReservationHolder.Username)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Reservation.ServiceWaiter.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Reservation.Time)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Reservation.Date)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Reservation.TotalPrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Reservation.Tip)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

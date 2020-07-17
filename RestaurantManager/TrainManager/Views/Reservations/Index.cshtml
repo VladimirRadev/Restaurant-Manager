@@ -1,0 +1,135 @@
+﻿@model IEnumerable<Data.Entities.Reservation>
+@using Data.Entities
+@using Microsoft.AspNetCore.Http
+@using ToDoManager.Models.Home
+@using ToDoManager.Utils
+
+@{
+    ViewData["Title"] = "Index";
+}
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    LoggedUser loggedUser = HttpContextAccessor.HttpContext.Session.GetObjectFromJson<LoggedUser>("loggedUser") == null
+        ? null
+        : HttpContextAccessor.HttpContext.Session.GetObjectFromJson<LoggedUser>("loggedUser");
+}
+
+
+@{
+    if (loggedUser != null && loggedUser.IsAdmin)
+    {
+        <h1>Reservations</h1>
+        <p>
+            <a asp-action="Create">New Reservation</a>
+        </p>
+    }
+    else
+    {
+        <h1>Current Reservation</h1>
+    }
+
+}
+
+
+<table class="table">
+    <thead>
+        <tr>
+
+            <th>
+                @Html.DisplayNameFor(model => model.ReservationHolder)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ServiceWaiter)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Date)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Time)
+            </th>
+            <th>
+                Actions
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (loggedUser != null && loggedUser.IsAdmin)
+        {
+            @foreach (var item in Model.Where(t=>t.IsPayed!=true).ToList())
+            {
+                @if (item.IsCanceled)
+                {
+                    <tr>
+                        <td>
+                            <strike>@Html.DisplayFor(modelItem => item.ReservationHolder.Username)</strike>
+                        </td>
+                        <td>
+                            <strike>@Html.DisplayFor(modelItem => item.ServiceWaiter.Name)</strike>
+                        </td>
+                        <td>
+                            <strike>@Html.DisplayFor(modelItem => item.Date)</strike>
+                        </td>
+                        <td>
+                            <strike>@Html.DisplayFor(modelItem => item.Time.TimeOfDay)</strike>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ReservationHolder.Username)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceWaiter.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Date)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Time.TimeOfDay)
+                        </td>
+
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            }
+        }
+        else
+        {
+            @foreach (var item in Model.Where(r => r.ReservationHolderId == loggedUser.Id))
+            {
+                @if (item.IsCanceled||item.IsPayed)
+                {
+                }
+                else
+                {
+                    <tr>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ReservationHolder.Username)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ServiceWaiter.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Date)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Time.TimeOfDay)
+                        </td>
+
+                        <td>
+                            <a asp-action="Cancel" asp-route-id="@item.Id">Cancel</a> |
+                            <a asp-action="PayBill" asp-route-id="@item.Id">Pay bill</a>
+                        </td>
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>
